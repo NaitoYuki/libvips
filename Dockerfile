@@ -40,7 +40,24 @@ RUN apt-get update && apt-get install -y \
     libgs-dev \
     libpango1.0-dev \
     libmatio-dev \
-    xz-utils
+    xz-utils \
+    autoconf \
+    automake \
+    libtool \
+    git \
+    cmake
+
+RUN git clone https://github.com/strukturag/libde265.git && \
+    cd libde265 && \
+    ./autogen.sh && \
+    ./configure && \
+    make
+
+RUN git clone https://github.com/videolan/x265.git && \
+    cd x265/build && \
+    cmake ../source && \
+    make && \
+    make install
 
 # libvips のソースのダウンロード
 WORKDIR /tmp
