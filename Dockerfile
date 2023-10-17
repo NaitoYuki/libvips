@@ -1,5 +1,5 @@
 # ベースとなるイメージを指定
-FROM ubuntu:latest
+FROM arm64v8/ubuntu:latest
 
 # 必要なパッケージのインストール
 RUN apt-get update && apt-get install -y \
