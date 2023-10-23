@@ -26,12 +26,25 @@ docker cp libvips-temp-container:/output/vips ./vips
 
 ## バイナリの圧縮
 
+linux
 ```
 tar cf libvips-8.14.5-linux-x64.tar vips
 brotli libvips-8.14.5-linux-x64.tar
 ```
 
+arm64
+```
+tar cf libvips-8.14.5-arm64-x64.tar vips
+brotli libvips-8.14.5-arm64-x64.tar
+```
+
 ## ダウンロードURL
+linux
 ```
 https://github.com/NaitoYuki/libvips/raw/master/v.8.14.5/libvips-8.14.5-linux-x64.tar.br
+```
+
+arm64
+```
+https://github.com/NaitoYuki/libvips/raw/master/v.8.14.5/libvips-8.14.5-arm64-x64.tar.br
 ```

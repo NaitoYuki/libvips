@@ -1,77 +1,53 @@
-# ベースとなるイメージを指定
-FROM arm64v8/ubuntu:latest
+FROM ubuntu:22.04
 
-# 必要なパッケージのインストール
+RUN mkdir /app
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    wget \
-    meson \
-    ninja-build \
-    pkg-config \
-    glib2.0-dev \
-    libgirepository1.0-dev \
-    libglib2.0-dev \
-    libjpeg-turbo8-dev \
-    libpng-dev \
-    libwebp-dev \
-    libtiff5-dev \
-    libexif-dev \
-    libgsf-1-dev \
-    liblcms2-dev \
-    libxml2-dev \
-    libheif-dev \
-    swig \
-    python3-dev \
-    python3-numpy \
-    libmagickwand-dev \
-    libpango1.0-dev \
-    libmatio-dev \
-    libopenslide-dev \
-    libcfitsio-dev \
-    libgif-dev \
-    libpoppler-glib-dev \
-    librsvg2-dev \
-    libtiff-tools \
-    fftw3-dev \
-    liborc-0.4-dev \
-    liblcms2-dev \
-    libzstd-dev \
-    libimagequant-dev \
-    libgs-dev \
-    libpango1.0-dev \
-    libmatio-dev \
-    xz-utils \
-    autoconf \
-    automake \
-    libtool \
-    git \
-    cmake
+        build-essential \
+        wget \
+        git \
+        pkg-config \
+        curl
 
-RUN git clone https://github.com/strukturag/libde265.git && \
-    cd libde265 && \
-    ./autogen.sh && \
-    ./configure && \
-    make
+RUN apt-get install -y python3 python3-pip python3-setuptools python3-wheel
+RUN pip3 install meson ninja
 
-RUN git clone https://github.com/videolan/x265.git && \
-    cd x265/build && \
-    cmake ../source && \
-    make && \
-    make install
+RUN apt-get install -y \
+        libexpat1-dev \
+        librsvg2-dev \
+        libpng-dev \
+        libjpeg-dev \
+        libwebp-dev \
+        libheif-dev \
+        libexif-dev \
+        liblcms2-dev \
+        libglib2.0-dev \
+        liborc-dev \
+        libgif-dev \
+        libgirepository1.0-dev \
+        libcgif-dev \
+        libcgif0 \
+        libimagequant-dev \
+        gettext
 
-# libvips のソースのダウンロード
-WORKDIR /tmp
-RUN wget https://github.com/libvips/libvips/releases/download/v8.14.5/vips-8.14.5.tar.xz
-RUN tar xf vips-8.14.5.tar.xz
+RUN export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 
-# libvips のビルド
-WORKDIR /tmp/vips-8.14.5
-RUN cd /tmp/vips-8.14.5
-RUN meson _build
-RUN ninja -C _build
-RUN ninja -C _build install
+ARG VIPS_VER=8.14.5
+ARG VIPS_DLURL=https://github.com/libvips/libvips/releases/download
+RUN cd /usr/local/src \
+        && wget ${VIPS_DLURL}/v${VIPS_VER}/vips-${VIPS_VER}.tar.xz \
+        && tar xf vips-${VIPS_VER}.tar.xz \
+        && cd vips-${VIPS_VER} \
+        && meson setup build --buildtype=release -Dcgif=enabled \
+        && cd build \
+        && meson compile \
+        && meson test \
+        && meson install
 RUN ldconfig
 
-# ビルドしたバイナリを保存するディレクトリを作成
 WORKDIR /output
 RUN cp /usr/local/bin/vips /output/
